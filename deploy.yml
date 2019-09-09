@@ -9,6 +9,8 @@
     repository_url: https://github.com/SKAPfhs1920/Checkin.git
     repository_path: '{{ home_dir }}/repo'
     virtualenv_path: '{{ home_dir }}/venv'
+    domain: 'checkin-server.local'
+
   tasks:
   - name: Create server user
     user:
@@ -33,3 +35,20 @@
   - name: Install requirements
     become_user: '{{ server_user }}'
     pip: requirements='{{ repository_path }}/requirements.txt' virtualenv='{{ virtualenv_path }}' virtualenv_python='python3'
+
+  - name: Make sure nginx is running
+    service: name=nginx enabled=yes state=started
+  
+  - name: Make sure supervisord is running
+    service: name=supervisor enabled=yes state=started
+
+  - name: Make sure static file path exists
+    file: path={{ home_dir }}/static state=directory
+
+  - name: Make sure nginx vhost is installed
+    template: src=nginx.conf.j2 dest=/etc/nginx/conf.d/{{ domain }}.conf
+    notify: reload nginx
+  
+  handlers:
+  - name: reload nginx
+    service: name=nginx state=reloaded

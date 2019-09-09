@@ -1,0 +1,18 @@
+server {
+    listen 80;
+    listen [::]:80;
+    server_name {{ domain }};
+
+    # Uncomment and create directory to also host static content
+    root {{ home_dir }}/static;
+    index index.html;
+
+    location / {
+        try_files $uri @checkinserver;
+    }
+
+    location @checkinserver {
+        include uwsgi_params;
+        uwsgi_pass unix:/tmp/checkinserver.sock;
+    }
+}
