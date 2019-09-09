@@ -1,0 +1,15 @@
+uwsgi:
+  virtualenv: venv
+  chdir: {{ repository_path }}/app
+  module: wsgi:app
+
+  master: yes
+  processes: 5
+
+  socket: {{ uwsgi_socket }}
+  chmod-socket: 660
+  vacuum: yes
+
+  die-on-term: yes
+
+  manage-script-name: yes

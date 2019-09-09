@@ -10,6 +10,7 @@
     repository_path: '{{ home_dir }}/repo'
     virtualenv_path: '{{ home_dir }}/venv'
     domain: 'checkin-server.local'
+    uwsgi_socket: '{{ home_dir }}/uwsgi.sock'
 
   tasks:
   - name: Create server user
@@ -27,6 +28,8 @@
     - nginx
     - python3-pip
     - virtualenv
+    - supervisor
+    - uwsgi
 
   - name: Clone repos
     become_user: '{{ server_user }}'
@@ -38,17 +41,30 @@
 
   - name: Make sure nginx is running
     service: name=nginx enabled=yes state=started
-  
+
   - name: Make sure supervisord is running
     service: name=supervisor enabled=yes state=started
 
   - name: Make sure static file path exists
     file: path={{ home_dir }}/static state=directory
 
-  - name: Make sure nginx vhost is installed
-    template: src=nginx.conf.j2 dest=/etc/nginx/conf.d/{{ domain }}.conf
+  - name: Install nginx vhost confing
+    template: src=templates/nginx.conf.j2 dest=/etc/nginx/conf.d/{{ domain }}.conf
     notify: reload nginx
-  
+
+  - name: Install supervisor config
+    template: src=templates/supervisor.conf.j2 dest=/etc/supervisor/conf.d/{{ domain }}_uwsgi.conf mode=755
+    notify: reload uwsgi
+
+  - name: Install uwsgi config
+    template: src=templates/uwsgi.yml.j2 dest={{ home_dir }}/uwsgi.yml
+
+  - name: Start uwsgi server
+    supervisorctl: name={{ domain }}_uwsgi state=restarted
+
   handlers:
   - name: reload nginx
     service: name=nginx state=reloaded
+
+  - name: reload uwsgi
+    supervisorctl: name={{ domain }}_uwsgi state=reread

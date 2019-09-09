@@ -1,0 +1,6 @@
+[program:{{ domain }}_uwsgi]
+autostart = true
+user = {{ server_user }}
+command = uwsgi --yaml {{ home_dir }}/uwsgi.yml
+priority = 1
+directory = {{ home_dir }}
