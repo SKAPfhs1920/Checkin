@@ -1,0 +1,27 @@
+---
+- name: Set up checkin server
+  hosts: checkin
+  vars:
+    home_dir: /srv/checkin
+    repository_url: https://github.com/SKAPfhs1920/Checkin.git
+    repository_path: '{{ home_dir }}/repo'
+    virtualenv_path: '{{ home_dir }}/venv'
+  user:
+    name: checkinserver
+    comment: Checkin server
+    home: '{{ home_dir }}'
+    create_home: yes
+    uid: 2001
+  tasks:
+  - name: Install software
+    become: yes
+    become_method: sudo
+    apt: update_cache=yes name={{ item }} state=present
+    with_items:
+    - git
+    - nginx
+    - python3-pip
+  - name: Clone repos
+    git: repo='{{ repository_url }}' dest='{{ repository_path }}'
+  - name: Install requirements
+    pip: requirements='{{ repository_path }}/requirements.txt' virtualenv='{{ virtualenv_path }}'
