@@ -30,6 +30,7 @@
     - virtualenv
     - supervisor
     - uwsgi
+    - uwsgi-plugin-python3
 
   - name: Clone repos
     become_user: '{{ server_user }}'
@@ -62,9 +63,12 @@
   - name: Start uwsgi server
     supervisorctl: name={{ domain }}_uwsgi state=restarted
 
+  - name: Chown socket
+    file: path={{ uwsgi_socket }} group=www-data
+
   handlers:
   - name: reload nginx
     service: name=nginx state=reloaded
 
   - name: reload uwsgi
-    supervisorctl: name={{ domain }}_uwsgi state=reread
+    supervisorctl: name={{ domain }}_uwsgi state=present

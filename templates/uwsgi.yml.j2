@@ -1,5 +1,6 @@
 uwsgi:
-  virtualenv: venv
+  plugins: python3
+  virtualenv: {{ virtualenv_path }}
   chdir: {{ repository_path }}/app
   module: wsgi:app
 
