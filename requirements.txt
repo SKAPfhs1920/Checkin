@@ -2,3 +2,6 @@ Flask
 SQLAlchemy
 Flask-SQLAlchemy
 flask-restful
+sqlalchemy-utils
+arrow
+phonenumbers

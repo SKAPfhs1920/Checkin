@@ -1,9 +1,15 @@
 from flask import Flask, url_for, jsonify
 app = Flask(__name__)
 
-import api
+from flask_sqlalchemy import SQLAlchemy
 
+import api
 api.register(app)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+db = SQLAlchemy(app)
+import model
+
 
 @app.route("/hello")
 def hello():
